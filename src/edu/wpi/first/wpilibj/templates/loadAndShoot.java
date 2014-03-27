@@ -31,7 +31,8 @@ public class loadAndShoot extends Thread {
     int suckingCount = 0;
     boolean doNotSuck = false; //stops the autosuction from screwing up
     SmartDashboard smart;
-    public final double LOADARM_REST_ANGLE = 3.7;
+    public final double LOADARM_REST_ANGLE = 3.65;
+    public final double LOADARM_REST_ANGLE2 = 3.75;
     public final double LOADARM_REST_ADJUSTMENT_SPEED = 0.3;
     public final double LOADARM_UNLOADED_MIN_THESHOLD = 2.5;
     public final double LOADARM_UNLOADED_THESHOLD = 3.6;
@@ -216,6 +217,9 @@ public class loadAndShoot extends Thread {
                 if (!loadingWithBall && !loadingWithoutBall && !sucking && !unloading && !digi3.get()) {
                     if (encoder.getAverageVoltage() < LOADARM_REST_ANGLE) {
                         victor.set(LOADARM_REST_ADJUSTMENT_SPEED);
+                        System.out.println("adjusting");
+                    } else if (encoder.getAverageVoltage() > LOADARM_REST_ANGLE2) {
+                        victor.set(-LOADARM_REST_ADJUSTMENT_SPEED);
                         System.out.println("adjusting");
                     } else {
                         victor.set(0);

@@ -21,7 +21,7 @@ public class CentralCode extends IterativeRobot {
 
     public final double autoMoveForwardTime = 2.5; // needs testing
     public final double AUTO_MOVE_FORWARD_SPEED = 0.6;
-    public final double AUTO_DISTANCE = 0.73;
+    public final double AUTO_DISTANCE = 0.74;
     public final int AUTO_GYRO_REDUCTION = 90;
     public final int AUTO_WAIT_TIME = 1;
     Timer autoTimer;
@@ -43,7 +43,7 @@ public class CentralCode extends IterativeRobot {
     Compressor compressor;
     DriverStation driverstation;
     int ultrasonicAverageCount;
-    double uAverage1, uAverage2, uAverage3, ultrasonicMaxValue;
+    double uAmount1, uAmount2, uAmount3, ultrasonicMaxValue;
 
     /**
      * This function is run when the robot is first started up and should be
@@ -128,25 +128,25 @@ public class CentralCode extends IterativeRobot {
         autoForward();
         ultrasonicAverageCount = 0;
         ultrasonicMaxValue = 999;
-        uAverage1 = 999;
-        uAverage2 = 999;
-        uAverage3 = 999;
+        uAmount1 = 999;
+        uAmount2 = 999;
+        uAmount3 = 999;
     }
 
     public void autonomousPeriodic() {
         ultrasonicAverageCount++;
         if(ultrasonicAverageCount%10==1){
-            uAverage1 = ultrasonic.getAverageVoltage();
+            uAmount1 = ultrasonic.getAverageVoltage();
         }
         if(ultrasonicAverageCount%10==2){
-            uAverage2 = ultrasonic.getAverageVoltage();
+            uAmount2 = ultrasonic.getAverageVoltage();
         }
         if(ultrasonicAverageCount%10==3){
-            uAverage3 = ultrasonic.getAverageVoltage();
+            uAmount3 = ultrasonic.getAverageVoltage();
             ultrasonicAverageCount = 0;
         }
-        ultrasonicMaxValue = Math.max(uAverage1, uAverage2);
-        ultrasonicMaxValue = Math.max(uAverage3, ultrasonicMaxValue);
+        ultrasonicMaxValue = Math.max(uAmount1, uAmount2);
+        ultrasonicMaxValue = Math.max(uAmount3, ultrasonicMaxValue);
         smart.putNumber("distance", ultrasonic.getVoltage());
         drive.setRun(false);
         loadAndShoot.setRun(false);
@@ -168,7 +168,7 @@ public class CentralCode extends IterativeRobot {
         if (autoTimer.get() >= autoTimeAtStop + 1) {
             autoStop = true;
             stop();
-            shoot();
+            //shoot();
             System.out.println("Shooting, Ultrasonic at " + ultrasonic.getAverageVoltage());
         }
     }
