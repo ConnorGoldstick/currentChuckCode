@@ -14,7 +14,7 @@ public class Shoot extends Thread {
     Solenoid sol4, sol5, sol7, sol8;
     int count;
     Unload Unload;
-    public final int CATAPAULT_EXTENSION_TIME = 100;
+    int catapaultExtensionTime = 100;
 
     public Shoot(Solenoid s4, Solenoid s5, Solenoid s7, Solenoid s8) {
         sol4 = s4;
@@ -24,17 +24,21 @@ public class Shoot extends Thread {
         
         count = 0;
     }
+    
+    public void setShotTime(int length){
+        catapaultExtensionTime = length;
+    }
 
     public void setCountToZero() {
         count = 0;
     }
 
     public void Shoot() {
-        if (count < CATAPAULT_EXTENSION_TIME) {
+        if (count < catapaultExtensionTime) {
             count++;
             catapaultShoot();
         }
-        if (count >= CATAPAULT_EXTENSION_TIME) {
+        if (count >= catapaultExtensionTime) {
             catapaultUnshoot();
         }
     }

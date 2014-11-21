@@ -19,15 +19,16 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  */
 public class CentralCode extends IterativeRobot {
 
-    public final double autoMoveForwardTime = 2.5; // needs testing
+    public final double autoMoveForwardTime = 1; // needs testing
     public final double AUTO_MOVE_FORWARD_SPEED = 0.6;
-    public final double AUTO_DISTANCE = 0.74;
+    public final double AUTO_DISTANCE = 1.7;
     public final int AUTO_GYRO_REDUCTION = 90;
     public final int AUTO_WAIT_TIME = 1;
+    public final double AUTO_FAST_SPEED = 1;
     Timer autoTimer;
     Jaguar jag1, jag2, jag3, jag4;
     Joystick xBox;
-    Victor victor;
+    Jaguar victor;
     Solenoid sol1, sol2, sol4, sol5, sol7, sol8;
     DigitalInput digi14, digi13, digi3;
     DigitalOutput teamColor/*
@@ -55,7 +56,7 @@ public class CentralCode extends IterativeRobot {
         jag2 = new Jaguar(1, 2);
         jag3 = new Jaguar(1, 3);
         jag4 = new Jaguar(1, 4);
-        victor = new Victor(5);
+        victor = new Jaguar(6);
 
         sol1 = new Solenoid(1);
         sol2 = new Solenoid(2);
@@ -135,13 +136,13 @@ public class CentralCode extends IterativeRobot {
 
     public void autonomousPeriodic() {
         ultrasonicAverageCount++;
-        if(ultrasonicAverageCount%10==1){
+        if (ultrasonicAverageCount % 10 == 1) {
             uAmount1 = ultrasonic.getAverageVoltage();
         }
-        if(ultrasonicAverageCount%10==2){
+        if (ultrasonicAverageCount % 10 == 2) {
             uAmount2 = ultrasonic.getAverageVoltage();
         }
-        if(ultrasonicAverageCount%10==3){
+        if (ultrasonicAverageCount % 10 == 3) {
             uAmount3 = ultrasonic.getAverageVoltage();
             ultrasonicAverageCount = 0;
         }
@@ -154,22 +155,26 @@ public class CentralCode extends IterativeRobot {
             System.out.println("Moving forward, Timer at " + autoTimer.get() + ", Ultrasonic at " + ultrasonic.getAverageVoltage());
         }
         if (autoTimer.get() >= autoMoveForwardTime && ultrasonicMaxValue <= AUTO_DISTANCE) {
-            stop();
             if (!autonomousStopped) {
+                autoFastForward();
                 autonomousStopped = true;
                 autoTimeAtStop = autoTimer.get();
             }
             System.out.println("Stopped, Ultrasonic at " + ultrasonic.getAverageVoltage());
         }
-        if (autoTimer.get() >= autoTimeAtStop + 0.9 && autoTimer.get() < autoTimeAtStop + 1 ) {
-            autoForward();
+        if (autoTimer.get() >= autoTimeAtStop + 0.9 && autoTimer.get() < autoTimeAtStop + 1.1) {
+            autoFastForward();
             System.out.println("Moving forward2, Timer at " + autoTimer.get() + ", Ultrasonic at " + ultrasonic.getAverageVoltage());
         }
-        if (autoTimer.get() >= autoTimeAtStop + 1) {
+        if (autoTimer.get() >= autoTimeAtStop + 1.1 && autoTimer.get() < autoTimeAtStop + 1.3) {
+            shoot();
+            System.out.println("Shooting, Ultrasonic at " + ultrasonic.getAverageVoltage());
+        }
+        if (autoTimer.get() >= autoTimeAtStop + 1.3) {
             autoStop = true;
             stop();
-            //shoot();
-            System.out.println("Shooting, Ultrasonic at " + ultrasonic.getAverageVoltage());
+            unshoot();
+            System.out.println("Autonomous Complete, Ultrasonic at " + ultrasonic.getAverageVoltage());
         }
     }
 
@@ -183,6 +188,7 @@ public class CentralCode extends IterativeRobot {
     }
 
     public void teleopPeriodic() {
+        System.out.println(xBox.getRawButton(4));
         smart.putNumber("distance", ultrasonic.getVoltage());
         setSuckingLED();
         setLEDTeamColour();
@@ -200,21 +206,21 @@ public class CentralCode extends IterativeRobot {
         smart.putBoolean("too far right", (gyro.getAngle() > 30 && gyro.getAngle() < 180) || gyro.getAngle() < -180);
         smart.putBoolean("too far left", (gyro.getAngle() < -30 && gyro.getAngle() > -180) || gyro.getAngle() > 180);
 
-        if (ultrasonic.getVoltage() < 0.55) {
+        if (ultrasonic.getVoltage() < 0.35) {
             tooClose = true;
         } else {
             tooClose = false;
         }
         smart.putBoolean("Too close", tooClose);
 
-        if (ultrasonic.getVoltage() > 0.8) {
+        if (ultrasonic.getVoltage() > 0.7) {
             tooFar = true;
         } else {
             tooFar = false;
         }
         smart.putBoolean("Too far", tooFar);
 
-        if (ultrasonic.getVoltage() >= 0.55 && ultrasonic.getVoltage() <= 0.8) {
+        if (ultrasonic.getVoltage() >= 0.35 && ultrasonic.getVoltage() <= 0.6) {
             inRange = true;
         } else {
             inRange = false;
@@ -258,6 +264,11 @@ public class CentralCode extends IterativeRobot {
         sol8.set(true);
     }
 
+    public void unshoot() {
+        sol7.set(true);
+        sol8.set(false);
+    }
+
     public void stop() {
         jag1.set(0);
         jag2.set(0);
@@ -270,6 +281,13 @@ public class CentralCode extends IterativeRobot {
         jag2.set(-AUTO_MOVE_FORWARD_SPEED);// - (gyro.getAngle()/AUTO_GYRO_REDUCTION));
         jag3.set(AUTO_MOVE_FORWARD_SPEED);// - (gyro.getAngle()/AUTO_GYRO_REDUCTION));
         jag4.set(AUTO_MOVE_FORWARD_SPEED);// - (gyro.getAngle()/AUTO_GYRO_REDUCTION));
+    }
+
+    public void autoFastForward() {
+        jag1.set(-AUTO_FAST_SPEED);// - (gyro.getAngle()/AUTO_GYRO_REDUCTION));
+        jag2.set(-AUTO_FAST_SPEED);// - (gyro.getAngle()/AUTO_GYRO_REDUCTION));
+        jag3.set(AUTO_FAST_SPEED);// - (gyro.getAngle()/AUTO_GYRO_REDUCTION));
+        jag4.set(AUTO_FAST_SPEED);// - (gyro.getAngle()/AUTO_GYRO_REDUCTION));
     }
 
     public void setLEDTeamColour() {

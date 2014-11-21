@@ -4,16 +4,16 @@
  */
 package edu.wpi.first.wpilibj.templates;
 
+import edu.wpi.first.wpilibj.Jaguar;
 import edu.wpi.first.wpilibj.Solenoid;
-import edu.wpi.first.wpilibj.Victor;
 
 public class SuckUpBall {
 
-    Victor victor;
+    Jaguar victor;
     Solenoid sol4, sol5;
     public final double VICTOR_SPEED_WHILE_SUCTIONING = -0.7;
 
-    public SuckUpBall(Victor v, Solenoid s4, Solenoid s5) {
+    public SuckUpBall(Jaguar v, Solenoid s4, Solenoid s5) {
         victor = v;
         sol4 = s4;
         sol5 = s5;

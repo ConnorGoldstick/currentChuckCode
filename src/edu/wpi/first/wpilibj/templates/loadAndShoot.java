@@ -11,7 +11,7 @@ public class loadAndShoot extends Thread {
 
     boolean running = false;
     Solenoid sol4, sol5, sol7, sol8;
-    Victor victor;
+    Jaguar victor;
     AnalogChannel encoder;
     DigitalInput digi14, digi13, digi3;
     Joystick xBox;
@@ -26,20 +26,18 @@ public class loadAndShoot extends Thread {
     Unload Unload;
     boolean unloading = false; //extends the suction cup
     SuckUpBall SuckUpBall;
-    boolean okToSuck = false; //toggles on/off the auto suction
     boolean sucking = false; //begins the autosuction
     int suckingCount = 0;
-    boolean doNotSuck = false; //stops the autosuction from screwing up
     SmartDashboard smart;
     public final double LOADARM_REST_ANGLE = 3.65;
     public final double LOADARM_REST_ANGLE2 = 3.75;
     public final double LOADARM_REST_ADJUSTMENT_SPEED = 0.3;
     public final double LOADARM_UNLOADED_MIN_THESHOLD = 2.5;
-    public final double LOADARM_UNLOADED_THESHOLD = 3.6;
+    public final double LOADARM_UNLOADED_THESHOLD = 3.7;
     public final int SHOOT_COUNT_MAX = 105;
     public final int SUCTION_COUNT_MAX = 100;
 
-    public loadAndShoot(AnalogChannel e, Victor v, Solenoid s4, Solenoid s5, Solenoid s7, Solenoid s8, Joystick x, DigitalInput d14, DigitalInput d13, DigitalInput d3, SmartDashboard sd/*
+    public loadAndShoot(AnalogChannel e, Jaguar v, Solenoid s4, Solenoid s5, Solenoid s7, Solenoid s8, Joystick x, DigitalInput d14, DigitalInput d13, DigitalInput d3, SmartDashboard sd/*
              * , DigitalOutput rs
              */) {
         victor = v;
@@ -79,10 +77,8 @@ public class loadAndShoot extends Thread {
         endLoadCount = 0;
         unloading = false;
         ShootCount = 0;
-        okToSuck = true;
         sucking = false;
         suckingCount = 0;
-        doNotSuck = false;
     }
 
     public void resetBooleans() {
@@ -90,9 +86,7 @@ public class loadAndShoot extends Thread {
         loadingWithBall = false;
         loadingWithoutBall = false;
         unloading = false;
-        okToSuck = true;
         sucking = false;
-        doNotSuck = false;
         suctionOff();
         noShooty();
     }
@@ -115,7 +109,6 @@ public class loadAndShoot extends Thread {
                 double leftRightTrigger = xBox.getRawAxis(3);
                 double dPad = xBox.getRawAxis(6);
 
-                smart.putBoolean("auto suction enabled", !doNotSuck && okToSuck);
                 if (dPad == -1) {
                     System.out.println("reset everything");
                     reset();
@@ -126,14 +119,9 @@ public class loadAndShoot extends Thread {
                 if (xButton) { //toggle off
                     System.out.println("toggle suction off");
                     suctionOff();
-                    okToSuck = false;
+                    sucking = false;
                 }
-                if (yButton) { //toggle on
-                    System.out.println("toggle suction on");
-                    okToSuck = true;
-                    doNotSuck = false; //resets the autosuction stop
-                }
-                if ((digi14.get() || digi13.get() || leftRightTrigger > .95) && !loadingWithBall && !loadingWithoutBall && !unloading && !shooting && !sucking && okToSuck && !doNotSuck && !digi3.get()) {
+                if (leftRightTrigger > .95 && !loadingWithBall && !loadingWithoutBall && !unloading && !shooting && !sucking && !digi3.get()) {
                     System.out.println("start suction");
                     sucking = true; //checks to see if ball is touching limit switch
                 }
@@ -145,7 +133,7 @@ public class loadAndShoot extends Thread {
                 if (suckingCount > SUCTION_COUNT_MAX) { //ends autosuction
                     System.out.println("end suction");
                     suckingCount = 0;
-                    endAutosuction();
+                    endSuctionMovement();
                 }
                 //end autosuction and manual suction
 
@@ -185,6 +173,15 @@ public class loadAndShoot extends Thread {
                     setReadyShootLED();
                     shooting = true;
                     shooter.setCountToZero(); //resets the count in the class to zero
+                    shooter.setShotTime(100);
+                }
+                System.out.println("Y Button: " + yButton);
+                if (yButton == true && !loadingWithBall && !loadingWithoutBall && !unloading && !shooting) {
+                    System.out.println("start shooting");
+                    setReadyShootLED();
+                    shooting = true;
+                    shooter.setCountToZero(); //resets the count in the class to zero
+                    shooter.setShotTime(4);
                 }
                 if (shooting) { //currently shooting
                     System.out.println("shooting");
@@ -233,7 +230,6 @@ public class loadAndShoot extends Thread {
     public void endUnload() {
         unloading = false;
         victor.set(0); //stops the victor
-        doNotSuck = false; //resets the autosuction stop
     }
 
     public void reset() {
@@ -242,8 +238,6 @@ public class loadAndShoot extends Thread {
         unloading = false;
         shooting = false;
         sucking = false;
-        okToSuck = false;
-        doNotSuck = false;
         sol7.set(true);
         sol8.set(false);
     }
@@ -251,6 +245,7 @@ public class loadAndShoot extends Thread {
     public void suctionOff() {
         sol4.set(false);
         sol5.set(true);
+        victor.set(0);
     }
 
     public void noShooty() {
@@ -273,10 +268,9 @@ public class loadAndShoot extends Thread {
         }
     }
 
-    public void endAutosuction() {
+    public void endSuctionMovement() {
         victor.set(0); //stops the victor movement
         sucking = false;
-        doNotSuck = true; //prevents the autosuction from activating again
     }
 
     public void setReadyShootLED() {

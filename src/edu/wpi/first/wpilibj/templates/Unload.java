@@ -4,16 +4,16 @@
  */
 package edu.wpi.first.wpilibj.templates;
 
+import edu.wpi.first.wpilibj.Jaguar;
 import edu.wpi.first.wpilibj.Solenoid;
-import edu.wpi.first.wpilibj.Victor;
 
 public class Unload extends Thread {
 
-    Victor victor;
+    Jaguar victor;
     Solenoid sol4, sol5;
-    public final double UNLOADING_SPEED = -0.5;
+    public final double UNLOADING_SPEED = -0.6;
 
-    public Unload(Victor v, Solenoid s4, Solenoid s5) {
+    public Unload(Jaguar v, Solenoid s4, Solenoid s5) {
         victor = v;
         sol4 = s4;
         sol5 = s5;

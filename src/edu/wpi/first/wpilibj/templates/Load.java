@@ -5,19 +5,19 @@
 package edu.wpi.first.wpilibj.templates;
 
 import edu.wpi.first.wpilibj.AnalogChannel;
-import edu.wpi.first.wpilibj.Victor;
+import edu.wpi.first.wpilibj.Jaguar;
 
 public class Load extends Thread {
 
-    Victor victor;
+    Jaguar victor;
     AnalogChannel encoder;
-    public final double LOADSPEED_WITH_BALL = 0.9;
-    public final double LOADSPEED_WITHOUT_BALL = 0.5;
+    public final double LOADSPEED_WITH_BALL = 1;
+    public final double LOADSPEED_WITHOUT_BALL = 0.6;
     public final double LOADSPEED_AFTER_APEX = 0.2;
     public final double ENCODER_ANGLE_STOP = 0.5;
     public final double ENCODER_ANGLE_THRESHOLD = 3;
 
-    public Load(Victor v, AnalogChannel e) {
+    public Load(Jaguar v, AnalogChannel e) {
         victor = v;
         encoder = e;
     }
